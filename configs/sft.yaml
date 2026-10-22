@@ -1,0 +1,27 @@
+model_name: Qwen/Qwen2.5-0.5B-Instruct
+output_dir: outputs/sft
+seed: 42
+
+data:
+  train_samples: null        # full GSM8K train split (7473)
+
+lora:
+  enabled: true
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+train:
+  learning_rate: 1.0e-4      # LoRA tolerates a higher LR than full fine-tuning
+  num_train_epochs: 2
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 4
+  max_length: 1024
+  warmup_steps: 20
+  lr_scheduler_type: cosine
+  logging_steps: 10
+  save_strategy: "no"
+  bf16: true
+  gradient_checkpointing: true
+  report_to: none

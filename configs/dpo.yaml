@@ -1,0 +1,28 @@
+# starts from the merged SFT model; the reference is the same model
+# (LoRA adapter disabled), so only one copy is held in memory
+model_name: outputs/sft/merged
+pairs_path: data/generated/pairs.jsonl
+output_dir: outputs/dpo
+seed: 42
+
+lora:
+  enabled: true
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+train:
+  beta: 0.1
+  loss_type: [sigmoid]       # sigmoid = original DPO, ipo, hinge, ...
+  learning_rate: 5.0e-6
+  num_train_epochs: 1
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 8
+  max_length: 1024
+  warmup_steps: 10
+  logging_steps: 5
+  save_strategy: "no"
+  bf16: true
+  gradient_checkpointing: true
+  report_to: none

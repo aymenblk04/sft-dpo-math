@@ -1,0 +1,12 @@
+# sampling K answers per training question from the SFT model
+model_name: outputs/sft/merged
+output_path: data/generated/pairs.jsonl
+num_questions: 3000
+num_samples: 8
+temperature: 0.8
+top_p: 0.95
+max_new_tokens: 320
+batch_size: 16
+max_pairs_per_prompt: 2
+strategy: hard
+seed: 0
