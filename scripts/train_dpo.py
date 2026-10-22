@@ -22,6 +22,7 @@ def main():
 
     pairs = load_dataset("json", data_files=cfg["pairs_path"], split="train")
     trainer = train_dpo(cfg, pairs.shuffle(seed=cfg.get("seed", 0)))
+    trainer.save_state()  # trainer_state.json with the log history, used by plot.py
     save_merged(trainer, Path(cfg["output_dir"]) / "merged")
 
 

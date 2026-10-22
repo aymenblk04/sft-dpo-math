@@ -20,6 +20,7 @@ def main():
 
     raw = load_raw("train", cfg["data"].get("train_samples"), cfg.get("seed", 0))
     trainer = train_sft(cfg, build_sft_dataset(raw))
+    trainer.save_state()  # trainer_state.json with the log history, used by plot.py
     merged = save_merged(trainer, Path(cfg["output_dir"]) / "merged")
     print(f"merged SFT model saved to {merged}")
 
