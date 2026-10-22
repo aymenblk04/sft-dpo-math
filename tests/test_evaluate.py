@@ -8,8 +8,11 @@ from sftdpo.generation import load_model
 
 
 def test_score():
-    m, recs = score(["<think>a</think><answer>4</answer>", "<answer>3</answer>"], ["4", "4"])
-    assert m["accuracy"] == 0.5 and m["format_rate"] == 0.5
+    m, recs = score(
+        ["<think>a</think><answer>4</answer>", "<answer>3</answer>", "so the total is 4."], ["4", "4", "4"]
+    )
+    assert m["accuracy"] == 1 / 3 and m["format_rate"] == 1 / 3
+    assert m["accuracy_lenient"] == 2 / 3  # untagged correct answer counts, wrong tagged one does not
     assert recs[1]["prediction"] == "3"
 
 

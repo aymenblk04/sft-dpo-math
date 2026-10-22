@@ -6,7 +6,12 @@ import json
 from pathlib import Path
 
 from sftdpo.generation import generate
-from sftdpo.verify import extract_answer, is_correct, is_well_formatted
+from sftdpo.verify import extract_answer, is_correct, is_well_formatted, parse_number
+
+
+def _last_number_correct(text: str, gold: str) -> bool:
+    pred, ref = parse_number(text), parse_number(gold)
+    return pred is not None and pred == ref
 
 
 def score(completions: list[str], golds: list[str]) -> tuple[dict, list[dict]]:
@@ -16,6 +21,8 @@ def score(completions: list[str], golds: list[str]) -> tuple[dict, list[dict]]:
             "prediction": extract_answer(c),
             "gold": g,
             "correct": is_correct(c, g),
+            # last number of the text: fair to models that ignore the tags (e.g. the base model)
+            "correct_lenient": is_correct(c, g) if extract_answer(c) is not None else _last_number_correct(c, g),
             "format_ok": is_well_formatted(c),
         }
         for c, g in zip(completions, golds)
@@ -24,6 +31,7 @@ def score(completions: list[str], golds: list[str]) -> tuple[dict, list[dict]]:
     metrics = {
         "n": len(records),
         "accuracy": sum(r["correct"] for r in records) / n,
+        "accuracy_lenient": sum(r["correct_lenient"] for r in records) / n,
         "format_rate": sum(r["format_ok"] for r in records) / n,
         "mean_chars": sum(len(r["completion"]) for r in records) / n,
     }

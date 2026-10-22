@@ -21,4 +21,4 @@ def test_plot_and_table(tmp_path):
     plot.plot_curves(["dpo"], tmp_path / "outputs", figs)
     assert (figs / "dpo_curves.png").exists()
     table = plot.results_table(["base", "sft", "dpo"], tmp_path / "results")
-    assert table.splitlines()[2:] == ["| sft | 30.0% | 100.0% | 250 |", "| dpo | 35.0% | 100.0% | 250 |"]
+    assert table.splitlines()[2:] == ["| sft | 30.0% | – | 100.0% | 250 |", "| dpo | 35.0% | – | 100.0% | 250 |"]

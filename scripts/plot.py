@@ -41,12 +41,18 @@ def plot_curves(runs, outputs: Path, out: Path):
 
 
 def results_table(runs, results: Path) -> str:
-    lines = ["| model | accuracy | format rate | mean chars |", "|---|---|---|---|"]
+    lines = [
+        "| model | accuracy (tagged) | accuracy (lenient) | format rate | mean chars |",
+        "|---|---|---|---|---|",
+    ]
     for run in runs:
         f = results / run / "metrics.json"
         if f.exists():
             m = json.loads(f.read_text())
-            lines.append(f"| {run} | {m['accuracy']:.1%} | {m['format_rate']:.1%} | {m['mean_chars']:.0f} |")
+            lenient = f"{m['accuracy_lenient']:.1%}" if "accuracy_lenient" in m else "–"
+            lines.append(
+                f"| {run} | {m['accuracy']:.1%} | {lenient} | {m['format_rate']:.1%} | {m['mean_chars']:.0f} |"
+            )
     return "\n".join(lines)
 
 
