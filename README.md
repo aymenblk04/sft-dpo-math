@@ -1,6 +1,6 @@
 # SFT → DPO with verifiable preference pairs
 
-![tests](https://github.com/<your-username>/sft-dpo-math/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/aymenblk04/sft-dpo-math/actions/workflows/tests.yml/badge.svg)
 
 A small post-training pipeline for math reasoning on GSM8K:
 
