@@ -93,15 +93,68 @@ checked in CI.
 
 ## Results
 
-> Not run yet. Will be filled from `figures/results.md`, `figures/dpo_curves.png`
-> and `data/generated/pairs.stats.json`.
+### First Colab run (T4)
 
-| model | GSM8K accuracy | format rate |
-|---|---|---|
-| base (zero-shot) | – | – |
-| SFT | – | – |
-| SFT + DPO | – | – |
-| … ablations | – | – |
+Shortened pipeline from `notebooks/colab_quickrun.ipynb`:
+- SFT on 2,000 GSM8K questions for 1 epoch (LoRA);
+- pairs from 500 training questions × 4 samples;
+- DPO for 1 epoch on the resulting pairs (β = 0.1, sigmoid loss, LoRA,
+  lr 5e-6);
+- greedy evaluation on the same 300 test questions for every model.
+
+Raw outputs, logs and figures are in
+[`docs/results/colab_v1`](docs/results/colab_v1). Lenient accuracy was
+recomputed afterwards from the saved outputs.
+
+| model | accuracy (tagged) | accuracy (lenient) | format rate | mean length (chars) |
+|---|---|---|---|---|
+| Qwen2.5-0.5B-Instruct (zero-shot) | 0.0% | **37.3%** | 0.0% | 875 |
+| + SFT | 28.3% | **28.3%** | 99.7% | 231 |
+| + SFT + DPO | 29.3% | **29.3%** | 99.3% | 233 |
+
+*Tagged* counts only the number inside `<answer>`; *lenient* takes the last
+number of the output, which is fairer to the base model since it never uses
+the tags.
+
+**Statistics of the generated pairs** (`pairs.stats.json`):
+
+| questions | all 4 samples right | all 4 wrong | mixed → pairs | pairs | pass@4 |
+|---|---|---|---|---|---|
+| 500 | 33 | 212 | 255 | 449 | 57.6% |
+
+![DPO curves](docs/results/colab_v1/dpo_curves.png)
+
+### What the numbers say
+
+**1. SFT taught the format but cost accuracy.** After SFT almost every answer
+follows the template (99.7%), and answers are 4× shorter. But lenient
+accuracy drops from 37.3% to 28.3%. On the same questions, 58 go from right to
+wrong and 31 from wrong to right (exact McNemar test p ≈ 0.006). A likely
+cause is the training data: GSM8K reference solutions are terse, while the
+instruct model reasons at length, so imitating them shortens its reasoning.
+This is a known risk of SFT on short targets. Better options would be SFT on
+the model's own verified solutions (rejection-sampling fine-tuning) or a
+lower learning rate.
+
+**2. There is room for preference learning.** The SFT model gets 28% with
+greedy decoding, but at least one of 4 samples is correct on 57.6% of the
+training questions (pass@4). Half of the questions (255/500) give pairs, so
+the verified-pairs pipeline does produce signal.
+
+**3. DPO barely trained.** 449 pairs with an effective batch of 32 is only 15
+optimisation steps. The DPO loss moves from 0.693 (= log 2, the value at
+initialisation) to 0.691, and the reward margin reaches only 0.005. Preference
+accuracy on the training batches rises from 0.31 to 0.65, so the direction is
+right, but the update is tiny: 241 of the 300 evaluation outputs are identical
+to the SFT ones. The +1 point is not significant (7 vs 4 flips, p ≈ 0.55).
+
+### Next steps
+- **Give DPO enough steps.** Use more pairs (the full config samples 3,000
+  questions × 8), several epochs, and a LoRA learning rate around 5e-5;
+  5e-6 is a full fine-tuning value.
+- **Replace SFT on references by SFT on self-generated verified solutions**,
+  so the model keeps its own reasoning style while learning the format.
+- Then run the planned ablations (β, IPO, hard vs. random negatives).
 
 ## Project layout
 
