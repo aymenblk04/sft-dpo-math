@@ -1,0 +1,8 @@
+{
+  "questions": 500,
+  "all_correct": 33,
+  "all_wrong": 212,
+  "mixed": 255,
+  "pairs": 449,
+  "pass_at_k": 0.576
+}
